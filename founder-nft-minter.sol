@@ -9,6 +9,13 @@ import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 interface IFounderNFT {
     function mint(address to, uint256 rarityId, uint256 amount) external;
     function mintBatch(address to, uint256[] memory rarityIds, uint256[] memory amounts) external;
+    function tiers(uint256 rarityId) external view returns (
+        string memory name,
+        string memory code,
+        uint256 maxSupply,
+        uint256 currentSupply,
+        uint256 pointsNFT
+    );
 }
 
 contract FounderNFTMinter is Ownable, ReentrancyGuard {
@@ -54,6 +61,7 @@ contract FounderNFTMinter is Ownable, ReentrancyGuard {
     
     // Phase events
     event PhaseStarted(uint256 indexed phaseId);
+    event PhaseSupplyUpdated(uint256 indexed phaseId, uint256 indexed rarityId, uint256 newSupply);
     
     // Phase settings
     uint256 public currentPhase = 0;
@@ -89,8 +97,18 @@ contract FounderNFTMinter is Ownable, ReentrancyGuard {
         return phase.supply[rarityId] - phase.minted[rarityId];
     }
 
+    // Get remaining supply from the core NFT contract
+    function getRemainingSupply(uint256 rarityId) public view validRarity(rarityId) returns (uint256) {
+        (, , uint256 maxSupply, uint256 currentSupply, ) = nfts.tiers(rarityId);
+        return maxSupply - currentSupply;
+    }
+
     // Start a new phase
     function startPhase(uint256[6] memory prices, uint256[6] memory supply) external onlyOwner {
+
+        for (uint i = 0; i < 6; i++) {
+            require(supply[i] <= getRemainingSupply(i), "Phase supply exceeds remaining NFT supply");
+        }
         
         if (currentPhase > 0) {
             for (uint i = 0; i < 6; i++) {
@@ -107,6 +125,19 @@ contract FounderNFTMinter is Ownable, ReentrancyGuard {
         });
         
         emit PhaseStarted(currentPhase);
+    }
+
+    // Emergency function to update phase supply if needed (with validation)
+    function updatePhaseSupply(uint256 rarityId, uint256 newSupply) external onlyOwner validRarity(rarityId) {
+        require(currentPhase > 0, "No active phase");
+        
+        PhaseConfig storage phase = _phases[currentPhase];
+        require(newSupply >= phase.minted[rarityId], "New supply less than already minted");
+        require(newSupply - phase.minted[rarityId] <= getRemainingSupply(rarityId), "New supply exceeds remaining NFT supply");
+        
+        phase.supply[rarityId] = newSupply;
+        
+        emit PhaseSupplyUpdated(currentPhase, rarityId, newSupply);
     }
 
     // ------------------------------------------------------
@@ -234,9 +265,6 @@ contract FounderNFTMinter is Ownable, ReentrancyGuard {
             payments[rarityIds[i]] += payment;
         }
         
-        // Transfer USDC from user (only the final discounted price)
-        usdc.safeTransferFrom(msg.sender, address(this), paymentTotal);
-        
         // Ambassador update stats
         if (bytes(refCode).length > 0) {
             AmbassadorCode storage code = _codes[refCode];
@@ -261,7 +289,7 @@ contract FounderNFTMinter is Ownable, ReentrancyGuard {
         
         // Transfer USDC to Ambassador
         if (bytes(refCode).length > 0 && ambassadorTotal > 0) {
-            AmbassadorCode storage code = _codes[refCode];
+            AmbassadorCode memory code = _codes[refCode];
             usdc.safeTransfer(code.ambassador, ambassadorTotal);
             emit AmbassadorRewardPaid(code.ambassador, ambassadorTotal);
         }

@@ -52,8 +52,6 @@ contract FounderNFT is ERC1155, Ownable {
     // ------------------------------------------------------
 
     // Rarity tiers
-    enum Rarity { COMMON, UNCOMMON, RARE, EPIC, LEGENDARY, MYTHICAL }
-    
     struct RarityTier {
         string name;           // the name of this rarity tier (common, rare...)
         string code;           // another way of representation of the rarity tier (F,E,D,C,B,A)
@@ -63,28 +61,28 @@ contract FounderNFT is ERC1155, Ownable {
     }
     
     // Rarity ID corresponds to rarity tier data (0=COMMON, 1=UNCOMMON, etc.)
-    mapping(Rarity => RarityTier) public rarityTiers;
+    mapping(uint256 => RarityTier) public tiers;
 
     // Generate rarity tiers parameters
     function _initRarityTiers() internal {
-        rarityTiers[Rarity.COMMON]    = RarityTier({name: "Common",    code: "F", maxSupply: 3200, currentSupply: 0, pointsNFT:  100});
-        rarityTiers[Rarity.UNCOMMON]  = RarityTier({name: "Uncommon",  code: "E", maxSupply: 1600, currentSupply: 0, pointsNFT:  224});
-        rarityTiers[Rarity.RARE]      = RarityTier({name: "Rare",      code: "D", maxSupply:  800, currentSupply: 0, pointsNFT:  502});
-        rarityTiers[Rarity.EPIC]      = RarityTier({name: "Epic",      code: "C", maxSupply:  400, currentSupply: 0, pointsNFT: 1126});
-        rarityTiers[Rarity.LEGENDARY] = RarityTier({name: "Legendary", code: "B", maxSupply:  200, currentSupply: 0, pointsNFT: 2526});
-        rarityTiers[Rarity.MYTHICAL]  = RarityTier({name: "Mythical",  code: "A", maxSupply:  100, currentSupply: 0, pointsNFT: 5666});
+        tiers[0] = RarityTier({name: "Common",    code: "F", maxSupply: 3200, currentSupply: 0, pointsNFT:  100});
+        tiers[1] = RarityTier({name: "Uncommon",  code: "E", maxSupply: 1600, currentSupply: 0, pointsNFT:  224});
+        tiers[2] = RarityTier({name: "Rare",      code: "D", maxSupply:  800, currentSupply: 0, pointsNFT:  502});
+        tiers[3] = RarityTier({name: "Epic",      code: "C", maxSupply:  400, currentSupply: 0, pointsNFT: 1126});
+        tiers[4] = RarityTier({name: "Legendary", code: "B", maxSupply:  200, currentSupply: 0, pointsNFT: 2526});
+        tiers[5] = RarityTier({name: "Mythical",  code: "A", maxSupply:  100, currentSupply: 0, pointsNFT: 5666});
     }
 
-    // Get the rarity tier info for a given rarity (storage)
-    function _Tier(uint256 rarityId) view internal returns (RarityTier storage) {
-        require(rarityId >= uint256(Rarity.COMMON) && rarityId <= uint256(Rarity.MYTHICAL), "Invalid rarity ID");
-        return rarityTiers[Rarity(rarityId)];
+    // Protector for valid rarity
+    modifier validRarity(uint256 rarityId) {
+        require(rarityId <= 5, "Invalid rarity");
+        _;
     }
 
-    // Get the rarity tier info for a given rarity (memory)
-    function __Tier(uint256 rarityId) view internal returns (RarityTier memory) {
-        require(rarityId >= uint256(Rarity.COMMON) && rarityId <= uint256(Rarity.MYTHICAL), "Invalid rarity ID");
-        return rarityTiers[Rarity(rarityId)];
+    // Get the remaining supply for a particular rarity
+    function getRemainingSupply(uint256 rarityId) public view validRarity(rarityId) returns (uint256) {
+        RarityTier memory tier = tiers[rarityId];
+        return tier.maxSupply - tier.currentSupply;
     }
 
     // ------------------------------------------------------
@@ -106,17 +104,17 @@ contract FounderNFT is ERC1155, Ownable {
 
     // Turn the minting off
     function disableMinting() external onlyOwner activeMinting {
-        for (uint i = uint(Rarity.COMMON); i <= uint(Rarity.MYTHICAL); i++) {
-            RarityTier memory tier = __Tier(i);
+        for (uint i = 0; i <= 5; i++) {
+            RarityTier memory tier = tiers[i];
             require(tier.currentSupply == tier.maxSupply, "There are unminted NFTs");
         }
         mintingActive = false;
     }
 
     // Public mint function - available only for authorized minters
-    function mint(address to, uint256 rarityId, uint256 amount) external onlyMinter activeMinting {
+    function mint(address to, uint256 rarityId, uint256 amount) external onlyMinter activeMinting validRarity(rarityId) {
         require(amount > 0, "Amount must be greater than zero");
-        RarityTier storage tier = _Tier(rarityId);
+        RarityTier storage tier = tiers[rarityId];
         require(tier.currentSupply + amount <= tier.maxSupply, "Exceeds max supply");
         
         tier.currentSupply += amount;
@@ -129,7 +127,9 @@ contract FounderNFT is ERC1155, Ownable {
         require(rarityIds.length > 0, "Empty arrays");
         
         for (uint i = 0; i < rarityIds.length; i++) {
-            RarityTier storage tier = _Tier(rarityIds[i]);
+            require(amounts[i] > 0, "Amount must be greater than zero");
+            require(rarityIds[i] <= 5, "Invalid rarity");
+            RarityTier storage tier = tiers[rarityIds[i]];
             require(tier.currentSupply + amounts[i] <= tier.maxSupply, "Exceeds max supply");
             tier.currentSupply += amounts[i];
         }
@@ -138,9 +138,9 @@ contract FounderNFT is ERC1155, Ownable {
     }
     
     // Mint function for the team
-    function ownerMint(address to, uint256 rarityId, uint256 amount) external onlyOwner activeMinting {
+    function ownerMint(address to, uint256 rarityId, uint256 amount) external onlyOwner activeMinting validRarity(rarityId) {
         require(amount > 0, "Amount must be greater than zero");
-        RarityTier storage tier = _Tier(rarityId);
+        RarityTier storage tier = tiers[rarityId];
         require(tier.currentSupply + amount <= tier.maxSupply, "Exceeds max supply");
         
         tier.currentSupply += amount;
@@ -162,11 +162,11 @@ contract FounderNFT is ERC1155, Ownable {
     // ------------------------------------------------------
     
     // Burn single NFT type
-    function burn(uint256 rarityId, uint256 amount) external {
+    function burn(uint256 rarityId, uint256 amount) external validRarity(rarityId) {
         require(!mintingActive, "Minting is still active");
         require(amount > 0, "Amount must be greater than zero");
         require(balanceOf(msg.sender, rarityId) >= amount, "Insufficient balance");
-        RarityTier storage tier = _Tier(rarityId);
+        RarityTier storage tier = tiers[rarityId];
         require(tier.currentSupply >= amount, "Insufficient supply");
 
         tier.currentSupply -= amount;
@@ -178,8 +178,8 @@ contract FounderNFT is ERC1155, Ownable {
     // ------------------------------------------------------
 
     // Get the total amount of founder points for a given rarity
-    function getPointsTotal(uint256 rarityId) public view returns (uint256) {
-        RarityTier memory tier = __Tier(rarityId);
+    function getPointsTotal(uint256 rarityId) public view validRarity(rarityId) returns (uint256) {
+        RarityTier memory tier = tiers[rarityId];
         uint points = tier.pointsNFT;
         uint count = tier.currentSupply;
         return count * points;
@@ -188,15 +188,15 @@ contract FounderNFT is ERC1155, Ownable {
     // Get the total amount of founder points for all rarities
     function getPointsTotal() public view returns (uint256) {
         uint sum = 0;
-        for (uint i = uint(Rarity.COMMON); i <= uint(Rarity.MYTHICAL); i++) {
+        for (uint i = 0; i <= 5; i++) {
             sum += getPointsTotal(i);
         }
         return sum;
     }
 
     // Get the founder points for a given wallet address and given rarity
-    function getPointsWallet(address account, uint256 rarityId) public view returns (uint256) {
-        RarityTier memory tier = __Tier(rarityId);
+    function getPointsWallet(address account, uint256 rarityId) public view validRarity(rarityId) returns (uint256) {
+        RarityTier memory tier = tiers[rarityId];
         uint count = balanceOf(account, rarityId);
         uint points = tier.pointsNFT;
         return count * points;
@@ -205,7 +205,7 @@ contract FounderNFT is ERC1155, Ownable {
     // Get the founder points for a given wallet address
     function getPointsWallet(address account) public view returns (uint256) {
         uint sum = 0;
-        for (uint i = uint(Rarity.COMMON); i <= uint(Rarity.MYTHICAL); i++) {
+        for (uint i = 0; i <= 5; i++) {
             sum += getPointsWallet(account, i);
         }
         return sum;
