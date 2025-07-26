@@ -24,6 +24,8 @@ contract FounderNFTMinter is Ownable, ReentrancyGuard {
     
     // Constructor
     constructor(address initialOwner, address _nftContract, address _usdc, address[] memory _initialBoardMembers) Ownable(initialOwner) {
+        require(_nftContract != address(0) && _usdc != address(0));
+
         nfts = IFounderNFT(_nftContract);
         usdc = IERC20(_usdc);
         
@@ -92,7 +94,7 @@ contract FounderNFTMinter is Ownable, ReentrancyGuard {
         
         if (currentPhase > 0) {
             for (uint i = 0; i < 6; i++) {
-                require(getAvailableNFTs(i) > 0, "Previous phase not fully minted");
+                require(getAvailableNFTs(i) == 0, "Previous phase not fully minted");
                 require (prices[i] > getPhasePrice(i), "New price must be higher");
             }
         }
@@ -184,28 +186,29 @@ contract FounderNFTMinter is Ownable, ReentrancyGuard {
         // Get the payment details and validate the pararameters (no need for a discount value returned)
         (uint256 payment, , uint256 ambassador, uint256 team) = getPaymentDetails(rarityId, amount, refCode);
         
-        // Transfer USDC from user (only the final discounted price)
-        usdc.safeTransferFrom(msg.sender, address(this), payment);
+        // Update phase minting count
+        _phases[currentPhase].minted[rarityId] += amount;
         
-        // Ambassador actions
+        // Mint NFT
+        nfts.mint(msg.sender, rarityId, amount);
+
+        // Ambassador update stats
         if (bytes(refCode).length > 0) {
             AmbassadorCode storage code = _codes[refCode];
             // Update ambassador stats 
             code.minted[rarityId] += amount;
             code.earned += ambassador;
             code.raised += team;
-            // Pay ambassador reward immediately if applicable
-            if (ambassador > 0) {
-                usdc.safeTransfer(code.ambassador, ambassador);
-                emit AmbassadorRewardPaid(code.ambassador, ambassador);
-            }
         }
-        
-        // Update phase minting count
-        _phases[currentPhase].minted[rarityId] += amount;
-        
-        // Mint NFT
-        nfts.mint(msg.sender, rarityId, amount);
+
+        // Transfer USDC from user (only the final discounted price)
+        usdc.safeTransferFrom(msg.sender, address(this), payment);
+        // Transfer USDC to the Ambassador
+        if (bytes(refCode).length > 0 && ambassador > 0) {
+            AmbassadorCode storage code = _codes[refCode];
+            usdc.safeTransfer(code.ambassador, ambassador);
+            emit AmbassadorRewardPaid(code.ambassador, ambassador);
+        }
         emit NFTMinted(msg.sender, rarityId, amount, payment);
     }
     
@@ -234,7 +237,7 @@ contract FounderNFTMinter is Ownable, ReentrancyGuard {
         // Transfer USDC from user (only the final discounted price)
         usdc.safeTransferFrom(msg.sender, address(this), paymentTotal);
         
-        // Ambassador actions
+        // Ambassador update stats
         if (bytes(refCode).length > 0) {
             AmbassadorCode storage code = _codes[refCode];
             // Update ambassador stats 
@@ -243,22 +246,26 @@ contract FounderNFTMinter is Ownable, ReentrancyGuard {
             }
             code.earned += ambassadorTotal;
             code.raised += teamTotal;
-            // Pay ambassador reward immediately if applicable
-            if (ambassadorTotal > 0) {
-                usdc.safeTransfer(code.ambassador, ambassadorTotal);
-                emit AmbassadorRewardPaid(code.ambassador, ambassadorTotal);
-            }
         }
         
         // Update phase minting count
-        PhaseConfig memory phase = _phases[currentPhase];
         for (uint i = 0; i < rarityIds.length; i++) {
-            phase.minted[rarityIds[i]] += amounts[i];
+            _phases[currentPhase].minted[rarityIds[i]] += amounts[i];
         }
         
         // Mint NFTs
         nfts.mintBatch(msg.sender, rarityIds, amounts);
         
+        // Transfer USDC from user (only the final discounted price)
+        usdc.safeTransferFrom(msg.sender, address(this), paymentTotal);
+        
+        // Transfer USDC to Ambassador
+        if (bytes(refCode).length > 0 && ambassadorTotal > 0) {
+            AmbassadorCode storage code = _codes[refCode];
+            usdc.safeTransfer(code.ambassador, ambassadorTotal);
+            emit AmbassadorRewardPaid(code.ambassador, ambassadorTotal);
+        }
+
         // Emit events for each rarity
         for (uint i = 0; i < rarityIds.length; i++) {
             emit NFTMinted(msg.sender, rarityIds[i], amounts[i], payments[i]);

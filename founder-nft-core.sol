@@ -90,17 +90,17 @@ contract FounderNFT is ERC1155, Ownable {
     // ------------------------------------------------------
     // Minting NFTs
     // ------------------------------------------------------
-    bool mintingAcitve = true;
+    bool mintingActive = true;
 
     // Protector for minting
     modifier activeMinting() {
-        require(mintingAcitve, "Minting disabled");
+        require(mintingActive, "Minting disabled");
         _;
     }
 
     // Protector for trading when minting is active
     modifier allowTransfer(address to) {
-        require(!mintingAcitve || to.code.length == 0, "Trading closed while minting");
+        require(!mintingActive || to.code.length == 0, "Trading closed while minting");
         _;
     }
 
@@ -110,7 +110,7 @@ contract FounderNFT is ERC1155, Ownable {
             RarityTier memory tier = __Tier(i);
             require(tier.currentSupply == tier.maxSupply, "There are unminted NFTs");
         }
-        mintingAcitve = false;
+        mintingActive = false;
     }
 
     // Public mint function - available only for authorized minters
@@ -163,7 +163,7 @@ contract FounderNFT is ERC1155, Ownable {
     
     // Burn single NFT type
     function burn(uint256 rarityId, uint256 amount) external {
-        require(!mintingAcitve, "Minting is still active");
+        require(!mintingActive, "Minting is still active");
         require(amount > 0, "Amount must be greater than zero");
         require(balanceOf(msg.sender, rarityId) >= amount, "Insufficient balance");
         RarityTier storage tier = _Tier(rarityId);
