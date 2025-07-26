@@ -33,12 +33,16 @@ contract FounderNFT is ERC1155, Ownable {
     // External minting contracts
     // ------------------------------------------------------
     
+    // Events
+    event MinterAuthorizationChanged(address indexed minter, bool authorized);
+
     // Minter role for external minting contract
     mapping(address => bool) public authorizedMinters;
     
     // Authorize/deauthorize minter contracts
     function setAuthorizedMinter(address minter, bool authorized) external onlyOwner {
         authorizedMinters[minter] = authorized;
+        emit MinterAuthorizationChanged(minter, authorized);
     }
 
     // Protector for minting functions

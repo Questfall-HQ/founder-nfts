@@ -32,15 +32,14 @@ contract FounderNFTMinter is Ownable, ReentrancyGuard {
     // Constructor
     constructor(address initialOwner, address _nftContract, address _usdc, address[] memory _initialBoardMembers) Ownable(initialOwner) {
         require(_nftContract != address(0) && _usdc != address(0));
+        require(_initialBoardMembers.length > 0, "No board members provided");
 
         nfts = IFounderNFT(_nftContract);
         usdc = IERC20(_usdc);
         
         // Add initial board members
         for (uint i = 0; i < _initialBoardMembers.length; i++) {
-            boardMembers[_initialBoardMembers[i]] = true;
-            boardMemberCount++;
-            emit BoardMemberAdded(_initialBoardMembers[i]);
+            addBoardMember(_initialBoardMembers[i]);
         }
     }
 
@@ -247,6 +246,7 @@ contract FounderNFTMinter is Ownable, ReentrancyGuard {
     function mintBatch(uint256[] memory rarityIds, uint256[] memory amounts, string memory refCode) external nonReentrant {
         require(rarityIds.length == amounts.length, "Arrays length mismatch");
         require(rarityIds.length > 0, "Empty arrays");
+        require(rarityIds.length <= 5, "Wrong rarities list");
         
         uint256 paymentTotal = 0;
         uint256 discountTotal = 0;
