@@ -192,7 +192,6 @@ contract FounderNFTMinter is Ownable, ReentrancyGuard {
         require(getAvailableNFTs(rarityId) >= amount, "Exceeds phase remaining supply");
         
         payment = getPhasePrice(rarityId) * amount;
-        team = payment;
         discount = 0;
         ambassador = 0;
         
@@ -207,7 +206,7 @@ contract FounderNFTMinter is Ownable, ReentrancyGuard {
             discount = (payment * code.discount) / 100;
         }
         payment -= discount;
-        team -= ambassador;
+        team = payment - ambassador;
     }
 
     // Particular rarity minting
