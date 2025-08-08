@@ -246,7 +246,7 @@ contract FounderNFTMinter is Ownable, ReentrancyGuard {
     function mintBatch(uint256[] memory rarityIds, uint256[] memory amounts, string memory refCode) external nonReentrant {
         require(rarityIds.length == amounts.length, "Arrays length mismatch");
         require(rarityIds.length > 0, "Empty arrays");
-        require(rarityIds.length <= 5, "Wrong rarities list");
+        require(rarityIds.length <= 6, "Wrong rarities list");
         
         uint256 paymentTotal = 0;
         uint256 discountTotal = 0;
