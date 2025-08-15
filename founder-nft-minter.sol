@@ -7,8 +7,7 @@ import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
 interface IFounderNFT {
-    function mint(address to, uint256 rarityId, uint256 amount) external;
-    function mintBatch(address to, uint256[] memory rarityIds, uint256[] memory amounts) external;
+    function mint(uint256 rarityId, uint256 amount) external;
     function tiers(uint256 rarityId) external view returns (
         string memory name,
         string memory code,
@@ -219,7 +218,7 @@ contract FounderNFTMinter is Ownable, ReentrancyGuard {
         _phases[currentPhase].minted[rarityId] += amount;
         
         // Mint NFT
-        nfts.mint(msg.sender, rarityId, amount);
+        nfts.mint(rarityId, amount);
 
         // Ambassador update stats
         if (bytes(refCode).length > 0) {
@@ -241,64 +240,6 @@ contract FounderNFTMinter is Ownable, ReentrancyGuard {
         emit NFTMinted(msg.sender, rarityId, amount, payment);
     }
     
-    // Batch minting
-    function mintBatch(uint256[] memory rarityIds, uint256[] memory amounts, string memory refCode) external nonReentrant {
-        require(rarityIds.length == amounts.length, "Arrays length mismatch");
-        require(rarityIds.length > 0, "Empty arrays");
-        require(rarityIds.length <= 6, "Wrong rarities list");
-        
-        uint256 paymentTotal = 0;
-        uint256 discountTotal = 0;
-        uint256 ambassadorTotal = 0;
-        uint256 teamTotal = 0;
-        uint256[6] memory payments = [uint(0),0,0,0,0,0];
-
-        // Gather payment details and validate parameters
-        for (uint i = 0; i < rarityIds.length; i++) {
-            // Get the payment details and validate the pararameters
-            (uint256 payment, uint256 discount, uint256 ambassador, uint256 team) = getPaymentDetails(rarityIds[i], amounts[i], refCode);
-            paymentTotal += payment;
-            discountTotal += discount;
-            ambassadorTotal += ambassador;
-            teamTotal += team;
-            payments[rarityIds[i]] += payment;
-        }
-        
-        // Ambassador update stats
-        if (bytes(refCode).length > 0) {
-            AmbassadorCode storage code = _codes[refCode];
-            // Update ambassador stats 
-            for (uint i = 0; i < rarityIds.length; i++) {
-                code.minted[rarityIds[i]] += amounts[i];
-            }
-            code.earned += ambassadorTotal;
-            code.raised += teamTotal;
-        }
-        
-        // Update phase minting count
-        for (uint i = 0; i < rarityIds.length; i++) {
-            _phases[currentPhase].minted[rarityIds[i]] += amounts[i];
-        }
-        
-        // Mint NFTs
-        nfts.mintBatch(msg.sender, rarityIds, amounts);
-        
-        // Transfer USDC from user (only the final discounted price)
-        usdc.safeTransferFrom(msg.sender, address(this), paymentTotal);
-        
-        // Transfer USDC to Ambassador
-        if (bytes(refCode).length > 0 && ambassadorTotal > 0) {
-            AmbassadorCode memory code = _codes[refCode];
-            usdc.safeTransfer(code.ambassador, ambassadorTotal);
-            emit AmbassadorRewardPaid(code.ambassador, ambassadorTotal);
-        }
-
-        // Emit events for each rarity
-        for (uint i = 0; i < rarityIds.length; i++) {
-            emit NFTMinted(msg.sender, rarityIds[i], amounts[i], payments[i]);
-        }
-    }
-
     // ------------------------------------------------------
     // Withdrawal System
     // ------------------------------------------------------

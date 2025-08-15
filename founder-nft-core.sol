@@ -92,6 +92,8 @@ contract FounderNFT is ERC1155, Ownable {
     // ------------------------------------------------------
     // Minting NFTs
     // ------------------------------------------------------
+    event Mint(address indexed minter, uint256 rarityId, uint256 amount);
+
     bool mintingActive = true;
 
     // Protector for minting
@@ -116,39 +118,27 @@ contract FounderNFT is ERC1155, Ownable {
     }
 
     // Public mint function - available only for authorized minters
-    function mint(address to, uint256 rarityId, uint256 amount) external onlyMinter activeMinting validRarity(rarityId) {
+    function mint(uint256 rarityId, uint256 amount) external onlyMinter activeMinting validRarity(rarityId) {
         require(amount > 0, "Amount must be greater than zero");
         RarityTier storage tier = tiers[rarityId];
         require(tier.currentSupply + amount <= tier.maxSupply, "Exceeds max supply");
         
         tier.currentSupply += amount;
-        _mint(to, rarityId, amount, "");
-    }
-    
-    // Batch mint multiple rarities
-    function mintBatch(address to, uint256[] memory rarityIds, uint256[] memory amounts) external onlyMinter activeMinting {
-        require(rarityIds.length == amounts.length, "Arrays length mismatch");
-        require(rarityIds.length > 0, "Empty arrays");
-        
-        for (uint i = 0; i < rarityIds.length; i++) {
-            require(amounts[i] > 0, "Amount must be greater than zero");
-            require(rarityIds[i] <= 5, "Invalid rarity");
-            RarityTier storage tier = tiers[rarityIds[i]];
-            require(tier.currentSupply + amounts[i] <= tier.maxSupply, "Exceeds max supply");
-            tier.currentSupply += amounts[i];
-        }
-        
-        _mintBatch(to, rarityIds, amounts, "");
+        _mint(msg.sender, rarityId, amount, "");
+
+        emit Mint(msg.sender, rarityId, amount);
     }
     
     // Mint function for the team
-    function ownerMint(address to, uint256 rarityId, uint256 amount) external onlyOwner activeMinting validRarity(rarityId) {
+    function ownerMint(uint256 rarityId, uint256 amount) external onlyOwner activeMinting validRarity(rarityId) {
         require(amount > 0, "Amount must be greater than zero");
         RarityTier storage tier = tiers[rarityId];
         require(tier.currentSupply + amount <= tier.maxSupply, "Exceeds max supply");
         
         tier.currentSupply += amount;
-        _mint(to, rarityId, amount, "");
+        _mint(msg.sender, rarityId, amount, "");
+
+        emit Mint(msg.sender, rarityId, amount);
     }
 
     // Secure safeTransferFrom while minting is active
@@ -165,6 +155,8 @@ contract FounderNFT is ERC1155, Ownable {
     // Burning NFTs
     // ------------------------------------------------------
     
+    event Burn(address indexed minter, uint256 rarityId, uint256 amount);
+
     // Burn single NFT type
     function burn(uint256 rarityId, uint256 amount) external validRarity(rarityId) {
         require(!mintingActive, "Minting is still active");
@@ -175,6 +167,8 @@ contract FounderNFT is ERC1155, Ownable {
 
         tier.currentSupply -= amount;
         _burn(msg.sender, rarityId, amount);
+
+        emit Burn(msg.sender, rarityId, amount);
     }
 
     // ------------------------------------------------------
