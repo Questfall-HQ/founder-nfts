@@ -1,0 +1,10 @@
+{
+  "name": "Questfall Founder NFT",
+  "description": "Earns a share of the QFT token supply each week.",
+  "image": "ipfs://bafkreica24rlfhukd5y7odiulxpsbcgdw4cbsektf2s6l6krvvh7uhgsnm",
+  "animation_url": "ipfs://bafybeigr7e4fdrqrt2zaxoo2kp3swintu4drfkmwhwwe6w2maylf6qsrfy", 
+  "attributes": [
+    { "trait_type": "Founder Points", "value": "224" },
+    { "trait_type": "Rarity", "value": "Uncommon (E)" }
+  ]
+}
