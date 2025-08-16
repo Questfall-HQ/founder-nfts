@@ -29,16 +29,16 @@ contract FounderNFTMinter is Ownable, ReentrancyGuard {
     IERC20 public immutable usdc;
     
     // Constructor
-    constructor(address initialOwner, address _nftContract, address _usdc, address[] memory _initialBoardMembers) Ownable(initialOwner) {
-        require(_nftContract != address(0) && _usdc != address(0));
-        require(_initialBoardMembers.length > 0, "No board members provided");
+    constructor(address _nfts, address _usdc, address[] memory _members) Ownable(msg.sender) {
+        require(_nfts != address(0) && _usdc != address(0));
+        require(_members.length > 0, "No board members provided");
 
-        nfts = IFounderNFT(_nftContract);
+        nfts = IFounderNFT(_nfts);
         usdc = IERC20(_usdc);
         
         // Add initial board members
-        for (uint i = 0; i < _initialBoardMembers.length; i++) {
-            addBoardMember(_initialBoardMembers[i]);
+        for (uint i = 0; i < _members.length; i++) {
+            addBoardMember(_members[i]);
         }
     }
 
@@ -145,6 +145,7 @@ contract FounderNFTMinter is Ownable, ReentrancyGuard {
     // Ambassador settings
     struct AmbassadorCode {
         address ambassador;
+        address manager;
         uint256 discount; // 0-100 (e.g., 10 = 10%)
         uint256[6] minted;
         uint256 earned;
@@ -153,7 +154,7 @@ contract FounderNFTMinter is Ownable, ReentrancyGuard {
     mapping(string => AmbassadorCode) private _codes;
     
     // Create a new ambassador code
-    function createAmbassadorCode(string memory code, address ambassador, uint256 discount) external onlyOwner {
+    function createAmbassadorCode(string memory code, address ambassador, address manager, uint256 discount) external onlyOwner {
         require(bytes(code).length > 0, "Empty code");
         require(ambassador != address(0), "Invalid ambassador address");
         require(discount <= 30, "Discount too high"); // Max 30% discount
@@ -161,6 +162,7 @@ contract FounderNFTMinter is Ownable, ReentrancyGuard {
         
         _codes[code] = AmbassadorCode({
             ambassador: ambassador,
+            manager: manager,
             discount: discount,
             minted: [uint(0),0,0,0,0,0],
             earned: 0,
@@ -185,7 +187,7 @@ contract FounderNFTMinter is Ownable, ReentrancyGuard {
     event AmbassadorRewardPaid(address indexed ambassador, uint256 amount);
 
     // Get current price for a particular rarity and other payment details
-    function getPaymentDetails(uint256 rarityId, uint256 amount, string memory refCode) public view validRarity(rarityId) returns (uint256 payment, uint256 discount, uint256 ambassador, uint256 team) {
+    function getPaymentDetails(uint256 rarityId, uint256 amount, string memory refCode) public view validRarity(rarityId) returns (uint256 payment, uint256 discount, uint256 ambassador, uint256 manager, uint256 team) {
         require(amount > 0, "Amount must be greater than zero");
         require(getAvailableNFTs(rarityId) > 0, "No NFTs left in this phase");
         require(getAvailableNFTs(rarityId) >= amount, "Exceeds phase remaining supply");
@@ -193,6 +195,7 @@ contract FounderNFTMinter is Ownable, ReentrancyGuard {
         payment = getPhasePrice(rarityId) * amount;
         discount = 0;
         ambassador = 0;
+        manager = 0;
         
         if (bytes(refCode).length > 0) {
             AmbassadorCode storage code = _codes[refCode];
@@ -201,18 +204,21 @@ contract FounderNFTMinter is Ownable, ReentrancyGuard {
 
             if (code.discount < 25) {
                 ambassador = (payment * (25 - code.discount)) / 100;
+                if (code.manager != address(0)) {
+                    manager = payment * 5 / 100;
+                }
             }
             discount = (payment * code.discount) / 100;
         }
         payment -= discount;
-        team = payment - ambassador;
+        team = payment - ambassador - manager;
     }
 
     // Particular rarity minting
     function mint(uint256 rarityId, uint256 amount, string memory refCode) external validRarity(rarityId) nonReentrant {
         
         // Get the payment details and validate the pararameters (no need for a discount value returned)
-        (uint256 payment, , uint256 ambassador, uint256 team) = getPaymentDetails(rarityId, amount, refCode);
+        (uint256 payment, , uint256 ambassador, uint256 manager, uint256 team) = getPaymentDetails(rarityId, amount, refCode);
         
         // Update phase minting count
         _phases[currentPhase].minted[rarityId] += amount;
@@ -236,6 +242,10 @@ contract FounderNFTMinter is Ownable, ReentrancyGuard {
             AmbassadorCode storage code = _codes[refCode];
             usdc.safeTransfer(code.ambassador, ambassador);
             emit AmbassadorRewardPaid(code.ambassador, ambassador);
+            if (manager > 0 && code.manager != address(0)) {
+                usdc.safeTransfer(code.manager, manager);
+                emit AmbassadorRewardPaid(code.manager, manager);
+            }
         }
         emit NFTMinted(msg.sender, rarityId, amount, payment);
     }

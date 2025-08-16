@@ -6,18 +6,7 @@
 	"output": {
 		"abi": [
 			{
-				"inputs": [
-					{
-						"internalType": "address",
-						"name": "initialOwner",
-						"type": "address"
-					},
-					{
-						"internalType": "string",
-						"name": "image",
-						"type": "string"
-					}
-				],
+				"inputs": [],
 				"stateMutability": "nonpayable",
 				"type": "constructor"
 			},
@@ -168,6 +157,56 @@
 					}
 				],
 				"name": "ApprovalForAll",
+				"type": "event"
+			},
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": true,
+						"internalType": "address",
+						"name": "minter",
+						"type": "address"
+					},
+					{
+						"indexed": false,
+						"internalType": "uint256",
+						"name": "rarityId",
+						"type": "uint256"
+					},
+					{
+						"indexed": false,
+						"internalType": "uint256",
+						"name": "amount",
+						"type": "uint256"
+					}
+				],
+				"name": "Burn",
+				"type": "event"
+			},
+			{
+				"anonymous": false,
+				"inputs": [
+					{
+						"indexed": true,
+						"internalType": "address",
+						"name": "minter",
+						"type": "address"
+					},
+					{
+						"indexed": false,
+						"internalType": "uint256",
+						"name": "rarityId",
+						"type": "uint256"
+					},
+					{
+						"indexed": false,
+						"internalType": "uint256",
+						"name": "amount",
+						"type": "uint256"
+					}
+				],
+				"name": "Mint",
 				"type": "event"
 			},
 			{
@@ -514,11 +553,6 @@
 			{
 				"inputs": [
 					{
-						"internalType": "address",
-						"name": "to",
-						"type": "address"
-					},
-					{
 						"internalType": "uint256",
 						"name": "rarityId",
 						"type": "uint256"
@@ -530,29 +564,6 @@
 					}
 				],
 				"name": "mint",
-				"outputs": [],
-				"stateMutability": "nonpayable",
-				"type": "function"
-			},
-			{
-				"inputs": [
-					{
-						"internalType": "address",
-						"name": "to",
-						"type": "address"
-					},
-					{
-						"internalType": "uint256[]",
-						"name": "rarityIds",
-						"type": "uint256[]"
-					},
-					{
-						"internalType": "uint256[]",
-						"name": "amounts",
-						"type": "uint256[]"
-					}
-				],
-				"name": "mintBatch",
 				"outputs": [],
 				"stateMutability": "nonpayable",
 				"type": "function"
@@ -585,11 +596,6 @@
 			},
 			{
 				"inputs": [
-					{
-						"internalType": "address",
-						"name": "to",
-						"type": "address"
-					},
 					{
 						"internalType": "uint256",
 						"name": "rarityId",
@@ -718,12 +724,17 @@
 			{
 				"inputs": [
 					{
+						"internalType": "uint256",
+						"name": "rarityID",
+						"type": "uint256"
+					},
+					{
 						"internalType": "string",
-						"name": "image",
+						"name": "cid",
 						"type": "string"
 					}
 				],
-				"name": "setUri",
+				"name": "setRarityURI",
 				"outputs": [],
 				"stateMutability": "nonpayable",
 				"type": "function"
@@ -816,7 +827,7 @@
 				"inputs": [
 					{
 						"internalType": "uint256",
-						"name": "",
+						"name": "rarityID",
 						"type": "uint256"
 					}
 				],
@@ -951,9 +962,6 @@
 				},
 				"transferOwnership(address)": {
 					"details": "Transfers ownership of the contract to a new account (`newOwner`). Can only be called by the current owner."
-				},
-				"uri(uint256)": {
-					"details": "See {IERC1155MetadataURI-uri}. This implementation returns the same URI for *all* token types. It relies on the token type ID substitution mechanism https://eips.ethereum.org/EIPS/eip-1155#metadata[defined in the ERC]. Clients calling this function must replace the `\\{id\\}` substring with the actual token type ID."
 				}
 			},
 			"version": 1
@@ -1117,11 +1125,11 @@
 			]
 		},
 		"founder-nft-core.sol": {
-			"keccak256": "0x5b5c9738972f9f21b53bddb44686f9272090a69da300d683eaeb56fbb6ee467d",
+			"keccak256": "0x73b4ff6cc3bf9089422660fa16aaea4e7f7328f9cd99b3eda8335b57062e91bd",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://58b6a1d8e9dde9d795ec42dc270e0cf63983874b616c57e967a4eb04d8afa5b8",
-				"dweb:/ipfs/QmNdK9WvxHUSpWWvtEdDfkuywXWgHzFXh4advgFpcbnN21"
+				"bzz-raw://5593ec6191a80305434664ffa21dc37d2fd8a6f24dceffb815a19961c2318d4e",
+				"dweb:/ipfs/QmVECvjy31GRRvqr4c3f1879TWzvfopbcoN5xNcH4V4Td5"
 			]
 		}
 	},

@@ -9,7 +9,7 @@ contract FounderNFT is ERC1155, Ownable {
     // ------------------------------------------------------
     // Constructor
     // ------------------------------------------------------
-    constructor(address initialOwner, string memory image) ERC1155(image) Ownable(initialOwner) {
+    constructor() ERC1155("") Ownable(msg.sender) {
         _initRarityTiers(); // Initialize rarity tiers
     }    
 
@@ -19,14 +19,22 @@ contract FounderNFT is ERC1155, Ownable {
         
     string public name = "Questfall Founder NFT";
     string public symbol = "QFNFT";
+    mapping(uint256 => string) private uris;
     
     // ------------------------------------------------------
     // Contract settings change
     // ------------------------------------------------------
     
-    // Change the uri of the NFT
-    function setUri(string memory image) external onlyOwner {
-        _setURI(image);
+    
+    // Change the CID of the NFT
+    function setRarityURI(uint256 rarityID, string memory cid) external onlyOwner {
+        uris[rarityID] = cid;
+    }
+
+    //  Return IPFS URI for rarityID
+    function uri(uint256 rarityID) public view override returns (string memory) {
+        require(bytes(uris[rarityID]).length > 0, "URI not set for token");
+        return string(abi.encodePacked("ipfs://", uris[rarityID]));
     }
 
     // ------------------------------------------------------

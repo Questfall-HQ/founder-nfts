@@ -49,19 +49,13 @@
 		},
 		"gasEstimates": null,
 		"methodIdentifiers": {
-			"mint(address,uint256,uint256)": "156e29f6",
-			"mintBatch(address,uint256[],uint256[])": "d81d0a15",
+			"mint(uint256,uint256)": "1b2ef1ca",
 			"tiers(uint256)": "039af9eb"
 		}
 	},
 	"abi": [
 		{
 			"inputs": [
-				{
-					"internalType": "address",
-					"name": "to",
-					"type": "address"
-				},
 				{
 					"internalType": "uint256",
 					"name": "rarityId",
@@ -74,29 +68,6 @@
 				}
 			],
 			"name": "mint",
-			"outputs": [],
-			"stateMutability": "nonpayable",
-			"type": "function"
-		},
-		{
-			"inputs": [
-				{
-					"internalType": "address",
-					"name": "to",
-					"type": "address"
-				},
-				{
-					"internalType": "uint256[]",
-					"name": "rarityIds",
-					"type": "uint256[]"
-				},
-				{
-					"internalType": "uint256[]",
-					"name": "amounts",
-					"type": "uint256[]"
-				}
-			],
-			"name": "mintBatch",
 			"outputs": [],
 			"stateMutability": "nonpayable",
 			"type": "function"

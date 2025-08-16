@@ -9,12 +9,7 @@
 				"inputs": [
 					{
 						"internalType": "address",
-						"name": "initialOwner",
-						"type": "address"
-					},
-					{
-						"internalType": "address",
-						"name": "_nftContract",
+						"name": "_nfts",
 						"type": "address"
 					},
 					{
@@ -24,7 +19,7 @@
 					},
 					{
 						"internalType": "address[]",
-						"name": "_initialBoardMembers",
+						"name": "_members",
 						"type": "address[]"
 					}
 				],
@@ -373,6 +368,11 @@
 						"type": "address"
 					},
 					{
+						"internalType": "address",
+						"name": "manager",
+						"type": "address"
+					},
+					{
 						"internalType": "uint256",
 						"name": "discount",
 						"type": "uint256"
@@ -424,6 +424,11 @@
 							{
 								"internalType": "address",
 								"name": "ambassador",
+								"type": "address"
+							},
+							{
+								"internalType": "address",
+								"name": "manager",
 								"type": "address"
 							},
 							{
@@ -520,6 +525,11 @@
 					{
 						"internalType": "uint256",
 						"name": "ambassador",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "manager",
 						"type": "uint256"
 					},
 					{
@@ -626,29 +636,6 @@
 					}
 				],
 				"name": "mint",
-				"outputs": [],
-				"stateMutability": "nonpayable",
-				"type": "function"
-			},
-			{
-				"inputs": [
-					{
-						"internalType": "uint256[]",
-						"name": "rarityIds",
-						"type": "uint256[]"
-					},
-					{
-						"internalType": "uint256[]",
-						"name": "amounts",
-						"type": "uint256[]"
-					},
-					{
-						"internalType": "string",
-						"name": "refCode",
-						"type": "string"
-					}
-				],
-				"name": "mintBatch",
 				"outputs": [],
 				"stateMutability": "nonpayable",
 				"type": "function"
@@ -956,11 +943,11 @@
 			]
 		},
 		"founder-nft-minter.sol": {
-			"keccak256": "0x3fe663a726bd461b663622d89f0d9495036573a0a543a175620d544e9173602f",
+			"keccak256": "0xb94fcd1d016502a4803fe80378b7f9e938e63713c7c353c2290f6aed06b57359",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://bdff982794c5cdcd5602e91f39fc3c54cc7d6c701317b6d6ee533d4d85c70012",
-				"dweb:/ipfs/QmcvvbvbvEcyJhCbzgoyYFXNChjRGGwteavANyb9TUnyJF"
+				"bzz-raw://048119e7d9a832dbc8d7fc1e42a266d1461edf5baa7bc7fb328235379632640a",
+				"dweb:/ipfs/QmdT8po91VUay26AWqhd481D3VmLVQ6WrUD9wTC4UAeX7G"
 			]
 		}
 	},
