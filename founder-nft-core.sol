@@ -102,7 +102,7 @@ contract FounderNFT is ERC1155, Ownable {
     // ------------------------------------------------------
     event Mint(address indexed minter, uint256 rarityId, uint256 amount);
 
-    bool mintingActive = true;
+    bool public mintingActive = true;
 
     // Protector for minting
     modifier activeMinting() {

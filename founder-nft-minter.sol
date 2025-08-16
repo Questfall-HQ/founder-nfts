@@ -214,6 +214,8 @@ contract FounderNFTMinter is Ownable, ReentrancyGuard {
         team = payment - ambassador - manager;
     }
 
+    event DebugStep(string step, uint256 value);
+
     // Particular rarity minting
     function mint(uint256 rarityId, uint256 amount, string memory refCode) external validRarity(rarityId) nonReentrant {
         
@@ -225,7 +227,7 @@ contract FounderNFTMinter is Ownable, ReentrancyGuard {
         
         // Mint NFT
         nfts.mint(rarityId, amount);
-
+        
         // Ambassador update stats
         if (bytes(refCode).length > 0) {
             AmbassadorCode storage code = _codes[refCode];
@@ -234,9 +236,10 @@ contract FounderNFTMinter is Ownable, ReentrancyGuard {
             code.earned += ambassador;
             code.raised += team;
         }
-
+        
         // Transfer USDC from user (only the final discounted price)
         usdc.safeTransferFrom(msg.sender, address(this), payment);
+        
         // Transfer USDC to the Ambassador
         if (bytes(refCode).length > 0 && ambassador > 0) {
             AmbassadorCode storage code = _codes[refCode];

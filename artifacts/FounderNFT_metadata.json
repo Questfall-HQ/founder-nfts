@@ -570,6 +570,19 @@
 			},
 			{
 				"inputs": [],
+				"name": "mintingActive",
+				"outputs": [
+					{
+						"internalType": "bool",
+						"name": "",
+						"type": "bool"
+					}
+				],
+				"stateMutability": "view",
+				"type": "function"
+			},
+			{
+				"inputs": [],
 				"name": "name",
 				"outputs": [
 					{
@@ -1125,11 +1138,11 @@
 			]
 		},
 		"founder-nft-core.sol": {
-			"keccak256": "0x73b4ff6cc3bf9089422660fa16aaea4e7f7328f9cd99b3eda8335b57062e91bd",
+			"keccak256": "0x444d27e7905953500199aa2caaab7f3ad87a13f0bae71b796e48d65eb2754c3a",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://5593ec6191a80305434664ffa21dc37d2fd8a6f24dceffb815a19961c2318d4e",
-				"dweb:/ipfs/QmVECvjy31GRRvqr4c3f1879TWzvfopbcoN5xNcH4V4Td5"
+				"bzz-raw://4bdfa25b677e32cb4563627ff33c782a3106cefe8529537bae6166c0e8d51b21",
+				"dweb:/ipfs/QmdV9pm4Hvf9hoiSkPLPSF3F3EP8qwx1yJKc4V4vXKakJ6"
 			]
 		}
 	},

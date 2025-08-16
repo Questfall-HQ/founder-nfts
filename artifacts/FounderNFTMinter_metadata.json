@@ -100,6 +100,25 @@
 				"anonymous": false,
 				"inputs": [
 					{
+						"indexed": false,
+						"internalType": "string",
+						"name": "step",
+						"type": "string"
+					},
+					{
+						"indexed": false,
+						"internalType": "uint256",
+						"name": "value",
+						"type": "uint256"
+					}
+				],
+				"name": "DebugStep",
+				"type": "event"
+			},
+			{
+				"anonymous": false,
+				"inputs": [
+					{
 						"indexed": true,
 						"internalType": "address",
 						"name": "buyer",
@@ -943,11 +962,11 @@
 			]
 		},
 		"founder-nft-minter.sol": {
-			"keccak256": "0xb94fcd1d016502a4803fe80378b7f9e938e63713c7c353c2290f6aed06b57359",
+			"keccak256": "0x37952996115bfe91eebe0008202c72af47409b34b7a33b1dfe79c682e1ee30e9",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://048119e7d9a832dbc8d7fc1e42a266d1461edf5baa7bc7fb328235379632640a",
-				"dweb:/ipfs/QmdT8po91VUay26AWqhd481D3VmLVQ6WrUD9wTC4UAeX7G"
+				"bzz-raw://7f9e4c7f423263055489b3a2bca735e8e0562a4ab4ef1ee1c471064e961d6d62",
+				"dweb:/ipfs/QmQbX9pB5zwe9C1CoZCiDg3e4ou9p2J3WeBrD13nBRycVt"
 			]
 		}
 	},
