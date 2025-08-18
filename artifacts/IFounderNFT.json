@@ -49,13 +49,18 @@
 		},
 		"gasEstimates": null,
 		"methodIdentifiers": {
-			"mint(uint256,uint256)": "1b2ef1ca",
+			"mint(address,uint256,uint256)": "156e29f6",
 			"tiers(uint256)": "039af9eb"
 		}
 	},
 	"abi": [
 		{
 			"inputs": [
+				{
+					"internalType": "address",
+					"name": "to",
+					"type": "address"
+				},
 				{
 					"internalType": "uint256",
 					"name": "rarityId",

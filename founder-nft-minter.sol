@@ -6,8 +6,33 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
+interface IAuthERC20 is IERC20 {
+    function transferWithAuthorization(
+        address from,
+        address to,
+        uint256 value,
+        uint256 validAfter,
+        uint256 validBefore,
+        bytes32 nonce,
+        uint8 v,
+        bytes32 r,
+        bytes32 s
+    ) external returns (bool);
+
+    function safeTransfer(
+        address to,
+        uint256 value
+    ) external returns (bool);
+
+    function safeTransferFrom(
+        address from,
+        address to,
+        uint256 value
+    ) external returns (bool);
+}
+
 interface IFounderNFT {
-    function mint(uint256 rarityId, uint256 amount) external;
+    function mint(address to, uint256 rarityId, uint256 amount) external;
     function tiers(uint256 rarityId) external view returns (
         string memory name,
         string memory code,
@@ -26,7 +51,7 @@ contract FounderNFTMinter is Ownable, ReentrancyGuard {
     
     // Constants and State Variables
     IFounderNFT public immutable nfts;
-    IERC20 public immutable usdc;
+    IAuthERC20 public immutable usdc;
     
     // Constructor
     constructor(address _nfts, address _usdc, address[] memory _members) Ownable(msg.sender) {
@@ -34,7 +59,7 @@ contract FounderNFTMinter is Ownable, ReentrancyGuard {
         require(_members.length > 0, "No board members provided");
 
         nfts = IFounderNFT(_nfts);
-        usdc = IERC20(_usdc);
+        usdc = IAuthERC20(_usdc);
         
         // Add initial board members
         for (uint i = 0; i < _members.length; i++) {
@@ -214,19 +239,77 @@ contract FounderNFTMinter is Ownable, ReentrancyGuard {
         team = payment - ambassador - manager;
     }
 
-    event DebugStep(string step, uint256 value);
+    function mintWithAuth(
+        uint256 rarityId,
+        uint256 quantity,
+        string memory refCode,
+        uint256 validAfter,
+        uint256 validBefore,
+        bytes32 nonce,
+        uint8 v,
+        bytes32 r,
+        bytes32 s
+    ) external {
+        
+        // Get the payment details and validate the parameters (no need for a discount value returned)
+        (uint256 payment, , uint256 ambassador, uint256 manager, uint256 team) = getPaymentDetails(rarityId, quantity, refCode);
+        
+        // Transfer USDC from user (only the final discounted price)
+        // usdc.safeTransferFrom(msg.sender, address(this), payment);
+        
+        // Direct transfer using authorization - NO allowance set
+        usdc.transferWithAuthorization(
+            msg.sender,     // from
+            address(this),  // to
+            payment,        // value
+            validAfter,     // valid after timestamp
+            validBefore,    // valid before timestamp  
+            nonce,          // unique nonce
+            v, r, s         // signature
+        );
+
+        require(false, "after transfered");
+         // Ambassador update stats
+        if (bytes(refCode).length > 0) {
+            AmbassadorCode storage code = _codes[refCode];
+            // Update ambassador stats 
+            code.minted[rarityId] += quantity;
+            code.earned += ambassador;
+            code.raised += team;
+        }
+
+        // Transfer USDC to the Ambassador
+        // if (bytes(refCode).length > 0 && ambassador > 0) {
+        //     AmbassadorCode storage code = _codes[refCode];
+        //     usdc.transfer(code.ambassador, ambassador);
+        //     emit AmbassadorRewardPaid(code.ambassador, ambassador);
+            
+        //     if (manager > 0 && code.manager != address(0)) {
+        //         usdc.transfer(code.manager, manager);
+        //         emit AmbassadorRewardPaid(code.manager, manager);
+        //     }
+        // }
+
+        // Update phase minting count
+        _phases[currentPhase].minted[rarityId] += quantity;
+        
+        // FIXED: Mint NFT to the user (msg.sender), not to this contract
+        nfts.mint(msg.sender, rarityId, quantity);
+
+        emit NFTMinted(msg.sender, rarityId, quantity, payment);
+    }
 
     // Particular rarity minting
     function mint(uint256 rarityId, uint256 amount, string memory refCode) external validRarity(rarityId) nonReentrant {
         
-        // Get the payment details and validate the pararameters (no need for a discount value returned)
+        // Get the payment details and validate the parameters (no need for a discount value returned)
         (uint256 payment, , uint256 ambassador, uint256 manager, uint256 team) = getPaymentDetails(rarityId, amount, refCode);
         
         // Update phase minting count
         _phases[currentPhase].minted[rarityId] += amount;
         
-        // Mint NFT
-        nfts.mint(rarityId, amount);
+        // FIXED: Mint NFT to the user (msg.sender), not to this contract
+        nfts.mint(msg.sender, rarityId, amount);
         
         // Ambassador update stats
         if (bytes(refCode).length > 0) {
@@ -238,20 +321,22 @@ contract FounderNFTMinter is Ownable, ReentrancyGuard {
         }
         
         // Transfer USDC from user (only the final discounted price)
-        usdc.safeTransferFrom(msg.sender, address(this), payment);
+        usdc.transferFrom(msg.sender, address(this), payment);
         
         // Transfer USDC to the Ambassador
         if (bytes(refCode).length > 0 && ambassador > 0) {
             AmbassadorCode storage code = _codes[refCode];
-            usdc.safeTransfer(code.ambassador, ambassador);
+            usdc.transfer(code.ambassador, ambassador);
             emit AmbassadorRewardPaid(code.ambassador, ambassador);
+            
             if (manager > 0 && code.manager != address(0)) {
-                usdc.safeTransfer(code.manager, manager);
+                usdc.transfer(code.manager, manager);
                 emit AmbassadorRewardPaid(code.manager, manager);
             }
         }
         emit NFTMinted(msg.sender, rarityId, amount, payment);
     }
+
     
     // ------------------------------------------------------
     // Withdrawal System
@@ -361,7 +446,7 @@ contract FounderNFTMinter is Ownable, ReentrancyGuard {
         WithdrawalRequest storage request = withdrawalRequests[requestId];
         
         request.executed = true;
-        usdc.safeTransfer(request.recipient, request.amount);
+        usdc.transfer(request.recipient, request.amount);
         
         emit WithdrawalExecuted(requestId, msg.sender, request.amount, request.recipient);
     }

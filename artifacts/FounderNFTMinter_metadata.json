@@ -54,17 +54,6 @@
 				"type": "error"
 			},
 			{
-				"inputs": [
-					{
-						"internalType": "address",
-						"name": "token",
-						"type": "address"
-					}
-				],
-				"name": "SafeERC20FailedOperation",
-				"type": "error"
-			},
-			{
 				"anonymous": false,
 				"inputs": [
 					{
@@ -94,25 +83,6 @@
 					}
 				],
 				"name": "BoardMemberAdded",
-				"type": "event"
-			},
-			{
-				"anonymous": false,
-				"inputs": [
-					{
-						"indexed": false,
-						"internalType": "string",
-						"name": "step",
-						"type": "string"
-					},
-					{
-						"indexed": false,
-						"internalType": "uint256",
-						"name": "value",
-						"type": "uint256"
-					}
-				],
-				"name": "DebugStep",
 				"type": "event"
 			},
 			{
@@ -660,6 +630,59 @@
 				"type": "function"
 			},
 			{
+				"inputs": [
+					{
+						"internalType": "uint256",
+						"name": "rarityId",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "quantity",
+						"type": "uint256"
+					},
+					{
+						"internalType": "string",
+						"name": "refCode",
+						"type": "string"
+					},
+					{
+						"internalType": "uint256",
+						"name": "validAfter",
+						"type": "uint256"
+					},
+					{
+						"internalType": "uint256",
+						"name": "validBefore",
+						"type": "uint256"
+					},
+					{
+						"internalType": "bytes32",
+						"name": "nonce",
+						"type": "bytes32"
+					},
+					{
+						"internalType": "uint8",
+						"name": "v",
+						"type": "uint8"
+					},
+					{
+						"internalType": "bytes32",
+						"name": "r",
+						"type": "bytes32"
+					},
+					{
+						"internalType": "bytes32",
+						"name": "s",
+						"type": "bytes32"
+					}
+				],
+				"name": "mintWithAuth",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
 				"inputs": [],
 				"name": "nfts",
 				"outputs": [
@@ -764,7 +787,7 @@
 				"name": "usdc",
 				"outputs": [
 					{
-						"internalType": "contract IERC20",
+						"internalType": "contract IAuthERC20",
 						"name": "",
 						"type": "address"
 					}
@@ -845,11 +868,6 @@
 				"ReentrancyGuardReentrantCall()": [
 					{
 						"details": "Unauthorized reentrant call."
-					}
-				],
-				"SafeERC20FailedOperation(address)": [
-					{
-						"details": "An operation with an ERC-20 token failed."
 					}
 				]
 			},
@@ -962,11 +980,11 @@
 			]
 		},
 		"founder-nft-minter.sol": {
-			"keccak256": "0x37952996115bfe91eebe0008202c72af47409b34b7a33b1dfe79c682e1ee30e9",
+			"keccak256": "0x0b7bb52b51c0b15764a2c045327c1248fc4df7d1e2c9cca44f2ef130929efbaa",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://7f9e4c7f423263055489b3a2bca735e8e0562a4ab4ef1ee1c471064e961d6d62",
-				"dweb:/ipfs/QmQbX9pB5zwe9C1CoZCiDg3e4ou9p2J3WeBrD13nBRycVt"
+				"bzz-raw://47213896ad747be00a34ad26f02233ba95fea0d9976ed8a1737a4a07fac64775",
+				"dweb:/ipfs/QmRvcVDMs1cxcKV71cy6Wu5TBjbFkDWi9TYFu4Cc185NV9"
 			]
 		}
 	},

@@ -126,15 +126,16 @@ contract FounderNFT is ERC1155, Ownable {
     }
 
     // Public mint function - available only for authorized minters
-    function mint(uint256 rarityId, uint256 amount) external onlyMinter activeMinting validRarity(rarityId) {
+    function mint(address to, uint256 rarityId, uint256 amount) external onlyMinter activeMinting validRarity(rarityId) {
+        require(to != address(0), "Invalid recipient address");
         require(amount > 0, "Amount must be greater than zero");
         RarityTier storage tier = tiers[rarityId];
         require(tier.currentSupply + amount <= tier.maxSupply, "Exceeds max supply");
         
         tier.currentSupply += amount;
-        _mint(msg.sender, rarityId, amount, "");
+        _mint(to, rarityId, amount, "");
 
-        emit Mint(msg.sender, rarityId, amount);
+        emit Mint(to, rarityId, amount);
     }
     
     // Mint function for the team

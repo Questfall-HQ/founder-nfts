@@ -8,6 +8,11 @@
 			{
 				"inputs": [
 					{
+						"internalType": "address",
+						"name": "to",
+						"type": "address"
+					},
+					{
 						"internalType": "uint256",
 						"name": "rarityId",
 						"type": "uint256"
@@ -163,11 +168,11 @@
 			]
 		},
 		"founder-nft-minter.sol": {
-			"keccak256": "0x37952996115bfe91eebe0008202c72af47409b34b7a33b1dfe79c682e1ee30e9",
+			"keccak256": "0x0b7bb52b51c0b15764a2c045327c1248fc4df7d1e2c9cca44f2ef130929efbaa",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://7f9e4c7f423263055489b3a2bca735e8e0562a4ab4ef1ee1c471064e961d6d62",
-				"dweb:/ipfs/QmQbX9pB5zwe9C1CoZCiDg3e4ou9p2J3WeBrD13nBRycVt"
+				"bzz-raw://47213896ad747be00a34ad26f02233ba95fea0d9976ed8a1737a4a07fac64775",
+				"dweb:/ipfs/QmRvcVDMs1cxcKV71cy6Wu5TBjbFkDWi9TYFu4Cc185NV9"
 			]
 		}
 	},
