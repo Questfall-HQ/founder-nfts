@@ -17,7 +17,7 @@ interface IAuthERC20 is IERC20 {
         uint8 v,
         bytes32 r,
         bytes32 s
-    ) external returns (bool);
+    ) external;
 
     function safeTransfer(
         address to,
@@ -246,9 +246,9 @@ contract FounderNFTMinter is Ownable, ReentrancyGuard {
         uint256 validAfter,
         uint256 validBefore,
         bytes32 nonce,
-        uint8 v,
         bytes32 r,
-        bytes32 s
+        bytes32 s,
+        uint8 v
     ) external {
         
         // Get the payment details and validate the parameters (no need for a discount value returned)
@@ -258,15 +258,32 @@ contract FounderNFTMinter is Ownable, ReentrancyGuard {
         // usdc.safeTransferFrom(msg.sender, address(this), payment);
         
         // Direct transfer using authorization - NO allowance set
-        usdc.transferWithAuthorization(
-            msg.sender,     // from
-            address(this),  // to
-            payment,        // value
-            validAfter,     // valid after timestamp
-            validBefore,    // valid before timestamp  
-            nonce,          // unique nonce
-            v, r, s         // signature
-        );
+        // usdc.transferWithAuthorization(
+        //     msg.sender,     // from
+        //     address(this),  // to
+        //     payment,        // value
+        //     validAfter,     // valid after timestamp
+        //     validBefore,    // valid before timestamp  
+        //     nonce,          // unique nonce
+        //     r, s, v         // signature
+        // );
+
+        try usdc.transferWithAuthorization(
+            msg.sender,
+            address(this),
+            payment,
+            validAfter,
+            validBefore,
+            nonce,
+            v, r, s
+        ) {
+            // Force a revert so you know you got here:
+            revert("after transfered");
+        } catch Error(string memory reason) {
+            revert(string(abi.encodePacked("twA failed: ", reason)));
+        } catch {
+            revert("twA failed: no revert data (selector mismatch?)");
+        }
 
         require(false, "after transfered");
          // Ambassador update stats

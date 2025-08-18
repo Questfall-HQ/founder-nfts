@@ -662,11 +662,6 @@
 						"type": "bytes32"
 					},
 					{
-						"internalType": "uint8",
-						"name": "v",
-						"type": "uint8"
-					},
-					{
 						"internalType": "bytes32",
 						"name": "r",
 						"type": "bytes32"
@@ -675,6 +670,11 @@
 						"internalType": "bytes32",
 						"name": "s",
 						"type": "bytes32"
+					},
+					{
+						"internalType": "uint8",
+						"name": "v",
+						"type": "uint8"
 					}
 				],
 				"name": "mintWithAuth",
@@ -980,11 +980,11 @@
 			]
 		},
 		"founder-nft-minter.sol": {
-			"keccak256": "0x0b7bb52b51c0b15764a2c045327c1248fc4df7d1e2c9cca44f2ef130929efbaa",
+			"keccak256": "0x9b3d20ceb611ac0f45afae390dde8c82384531f86dff2dbd0b69fe897e7b52e1",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://47213896ad747be00a34ad26f02233ba95fea0d9976ed8a1737a4a07fac64775",
-				"dweb:/ipfs/QmRvcVDMs1cxcKV71cy6Wu5TBjbFkDWi9TYFu4Cc185NV9"
+				"bzz-raw://91e6851e6bd6960d007a7e58640ef8e9af7176f3d3fff7b1f7a7fde1228796ac",
+				"dweb:/ipfs/QmZXFDF3NQniNHWXo2GEL5AN1ybMYbMV7JEdkYvUMLYuXX"
 			]
 		}
 	},

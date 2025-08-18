@@ -11,8 +11,17 @@ contract MockUSDC is ERC20, EIP712 {
     using SafeERC20 for IERC20;
 
     // EIP-3009 Transfer with Authorization typehash
-    bytes32 private constant TRANSFER_WITH_AUTHORIZATION_TYPEHASH = 
-        keccak256("TransferWithAuthorization(address from,address to,uint256 value,uint256 validAfter,uint256 validBefore,bytes32 nonce)");
+    bytes32 private constant TRANSFER_WITH_AUTHORIZATION_TYPEHASH =
+        keccak256(
+            "TransferWithAuthorization("
+                "address from,"
+                "address to,"
+                "uint256 value,"
+                "uint256 validAfter,"
+                "uint256 validBefore,"
+                "bytes32 nonce"
+            ")"
+        );
 
     // Track used authorizations: authorizer => nonce => used
     mapping(address => mapping(bytes32 => bool)) public authorizationState;
@@ -143,6 +152,7 @@ contract MockUSDC is ERC20, EIP712 {
         // require(false, "safe transfered");
 
         emit AuthorizationUsed(from, nonce);
+        require(false, "transfer end");
     }
 
    

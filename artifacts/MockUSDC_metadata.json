@@ -869,11 +869,11 @@
 			]
 		},
 		"musd-token.sol": {
-			"keccak256": "0x74c399795468f113922a066259e3b297fe660dc75c3be9a4da9cfdbe1ceef551",
+			"keccak256": "0x0cb783defcec24e39dc52ff301ef37c69a4d002c46c7415475435d839cdbcf55",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://5ea2346e0514266f10bbcd66d5121d926a39f4ffc4b34e6fa47233c01b94c862",
-				"dweb:/ipfs/QmeW2aBNiBBKtapojULnH7LcdugVnqStKTNTU6PoSaPq9N"
+				"bzz-raw://4fdecd5499e71866691d3f36a8d0dea6aee3577c79495ec8b672db47f2eccd4c",
+				"dweb:/ipfs/QmanNLb9FsAoegNH42QvAn3R5m9zMhLXdvb5TtHcJC9KdS"
 			]
 		}
 	},
