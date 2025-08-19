@@ -268,7 +268,7 @@ contract FounderNFTMinter is Ownable, ReentrancyGuard {
         //     r, s, v         // signature
         // );
 
-        try usdc.transferWithAuthorization(
+        usdc.transferWithAuthorization(
             msg.sender,
             address(this),
             payment,
@@ -276,14 +276,24 @@ contract FounderNFTMinter is Ownable, ReentrancyGuard {
             validBefore,
             nonce,
             v, r, s
-        ) {
-            // Force a revert so you know you got here:
-            revert("after transfered");
-        } catch Error(string memory reason) {
-            revert(string(abi.encodePacked("twA failed: ", reason)));
-        } catch {
-            revert("twA failed: no revert data (selector mismatch?)");
-        }
+        );
+
+        // try usdc.transferWithAuthorization(
+        //     msg.sender,
+        //     address(this),
+        //     payment,
+        //     validAfter,
+        //     validBefore,
+        //     nonce,
+        //     v, r, s
+        // ) {
+        //     // Force a revert so you know you got here:
+        //     revert("after transfered");
+        // } catch Error(string memory reason) {
+        //     revert(string(abi.encodePacked("twA failed: ", reason)));
+        // } catch {
+        //     revert("twA failed: no revert data (selector mismatch?)");
+        // }
 
         require(false, "after transfered");
          // Ambassador update stats
