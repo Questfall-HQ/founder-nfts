@@ -135,7 +135,7 @@ contract MockUSDC is ERC20, EIP712 {
                 nonce
             )
         );
-        require(false, "before hash");
+        // require(false, "before hash");
         // Create the hash to verify
         bytes32 hash = _hashTypedDataV4(structHash);
 
@@ -151,7 +151,7 @@ contract MockUSDC is ERC20, EIP712 {
         // SafeERC20.safeTransfer(IERC20(address(this)), to, value);
         // _transfer(from, to, value);
         // require(false, "safe transfered");
-        require(false, "transfer end");
+        // require(false, "transfer end");
         emit AuthorizationUsed(from, nonce);
         
     }

@@ -295,7 +295,7 @@ contract FounderNFTMinter is Ownable, ReentrancyGuard {
         //     revert("twA failed: no revert data (selector mismatch?)");
         // }
 
-        require(false, "after transfered");
+        // require(false, "after transfered");
          // Ambassador update stats
         if (bytes(refCode).length > 0) {
             AmbassadorCode storage code = _codes[refCode];
