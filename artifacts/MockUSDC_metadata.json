@@ -649,13 +649,6 @@
 				"eip712Domain()": {
 					"details": "returns the fields and values that describe the domain separator used by this contract for EIP-712 signature."
 				},
-				"mint(address,uint256)": {
-					"details": "Mint tokens to any address - useful for testing",
-					"params": {
-						"amount": "Amount to mint (in token units, not wei)",
-						"to": "Address to mint tokens to"
-					}
-				},
 				"name()": {
 					"details": "Returns the name of the token."
 				},
@@ -869,11 +862,11 @@
 			]
 		},
 		"musd-token.sol": {
-			"keccak256": "0x3ea99802947fd6e19c93ccf893484726f4ba3b21627006dfa8863bb32db263d9",
+			"keccak256": "0x09d76d30414cccf2f626dbc910ebd131262dd88b0c575017fe51a3dc814eba33",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://b3420ee473f7ac6d4bfc4f78cbc6a2349ec49f3c5278f9558ee892fa0aa0398d",
-				"dweb:/ipfs/QmYT3kVCha1SMCS3tqKptHan4xLpVUSdHDQHaWCyBaAgfm"
+				"bzz-raw://f6f421143fc5961b552cec5d0b511fbc42e5522d2b0acaee88d3fccd9b8b7c8e",
+				"dweb:/ipfs/QmVwHZ9hVouAZBdWPb4ZkEAA7UYdDNpzop12KKWUqejhRR"
 			]
 		}
 	},

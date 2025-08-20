@@ -164,10 +164,10 @@ contract FounderNFTMinter is Ownable, ReentrancyGuard {
     }
 
     // ------------------------------------------------------
-    // Ambassador System
+    // Discount System
     // ------------------------------------------------------
     
-    // Ambassador settings
+    // Ambassador codes
     struct AmbassadorCode {
         address ambassador;
         address manager;
@@ -176,16 +176,16 @@ contract FounderNFTMinter is Ownable, ReentrancyGuard {
         uint256 earned;
         uint256 raised;
     }
-    mapping(string => AmbassadorCode) private _codes;
+    mapping(string => AmbassadorCode) private _amb_codes;
     
     // Create a new ambassador code
     function createAmbassadorCode(string memory code, address ambassador, address manager, uint256 discount) external onlyOwner {
         require(bytes(code).length > 0, "Empty code");
         require(ambassador != address(0), "Invalid ambassador address");
-        require(discount <= 30, "Discount too high"); // Max 30% discount
-        require(_codes[code].ambassador == address(0), "Code already exists");
+        require(discount <= 25, "Discount too high"); // Max 25% discount
+        require(_amb_codes[code].ambassador == address(0), "Code already exists");
         
-        _codes[code] = AmbassadorCode({
+        _amb_codes[code] = AmbassadorCode({
             ambassador: ambassador,
             manager: manager,
             discount: discount,
@@ -196,11 +196,42 @@ contract FounderNFTMinter is Ownable, ReentrancyGuard {
     }
 
     // Get ambassador info by the code
-    function getAmbassador(string memory refCode) external view returns (AmbassadorCode memory) {
-        require(bytes(refCode).length > 0, "No code provided");
-        AmbassadorCode memory code = _codes[refCode];
-        require(code.ambassador != address(0), "Invalid code");
-        return code;
+    function getAmbassador(string memory code) external view returns (AmbassadorCode memory) {
+        require(bytes(code).length > 0, "No code provided");
+        AmbassadorCode memory _code = _amb_codes[code];
+        require(_code.ambassador != address(0), "Invalid code");
+        return _code;
+    }
+    
+    // -----------------------------------
+    // Personal discout codes
+    struct DiscounterCode {
+        address discounter;
+        uint256 discount; // 0-100 (e.g., 10 = 10%)
+        uint256[6] minted;
+    }
+    mapping(string => DiscounterCode) private _dis_codes;
+
+    // Create a new personal code
+    function createDicounterCode(string memory code, address discounter, uint256 discount) external onlyOwner {
+        require(bytes(code).length > 0, "Empty code");
+        require(discounter != address(0), "Invalid wallet address");
+        require(discount <= 30, "Discount too high"); // Max 30% discount
+        require(_dis_codes[code].discounter == address(0), "Code already exists");
+        
+        _dis_codes[code] = DiscounterCode({
+            discounter: discounter,
+            discount: discount,
+            minted: [uint(0),0,0,0,0,0]
+        });
+    }
+
+    // Get ambassador info by the code
+    function getDiscounter(string memory code) external view returns (DiscounterCode memory) {
+        require(bytes(code).length > 0, "No code provided");
+        DiscounterCode memory _code = _dis_codes[code];
+        require(_code.discounter != address(0), "Invalid code");
+        return _code;
     }
     
     // ------------------------------------------------------
@@ -212,159 +243,110 @@ contract FounderNFTMinter is Ownable, ReentrancyGuard {
     event AmbassadorRewardPaid(address indexed ambassador, uint256 amount);
 
     // Get current price for a particular rarity and other payment details
-    function getPaymentDetails(uint256 rarityId, uint256 amount, string memory refCode) public view validRarity(rarityId) returns (uint256 payment, uint256 discount, uint256 ambassador, uint256 manager, uint256 team) {
-        require(amount > 0, "Amount must be greater than zero");
-        require(getAvailableNFTs(rarityId) > 0, "No NFTs left in this phase");
-        require(getAvailableNFTs(rarityId) >= amount, "Exceeds phase remaining supply");
+    // function getPaymentDetails(uint256 rarityId, uint256 amount, string memory code) public view validRarity(rarityId) returns (uint256 payment, uint256 discount, uint256 ambassador, uint256 manager, uint256 team) {
+    //     require(amount > 0, "Amount must be greater than zero");
+    //     require(getAvailableNFTs(rarityId) > 0, "No NFTs left in this phase");
+    //     require(getAvailableNFTs(rarityId) >= amount, "Exceeds phase remaining supply");
         
-        payment = getPhasePrice(rarityId) * amount;
-        discount = 0;
-        ambassador = 0;
-        manager = 0;
+    //     payment = getPhasePrice(rarityId) * amount;
+    //     discount = 0;
+    //     ambassador = 0;
+    //     manager = 0;
         
-        if (bytes(refCode).length > 0) {
-            AmbassadorCode storage code = _codes[refCode];
-            require(code.ambassador != address(0), "Invalid code");
-            require(code.discount <= 25 || code.ambassador == msg.sender, "This code is only for self-usage");
+    //     if (bytes(refCode).length > 0) {
+    //         AmbassadorCode storage code = _codes[refCode];
+    //         require(code.ambassador != address(0), "Invalid code");
+    //         require(code.discount <= 25 || code.ambassador == msg.sender, "This code is only for self-usage");
 
-            if (code.discount < 25) {
-                ambassador = (payment * (25 - code.discount)) / 100;
-                if (code.manager != address(0)) {
-                    manager = payment * 5 / 100;
-                }
-            }
-            discount = (payment * code.discount) / 100;
-        }
-        payment -= discount;
-        team = payment - ambassador - manager;
+    //         if (code.discount < 25) {
+    //             ambassador = (payment * (25 - code.discount)) / 100;
+    //             if (code.manager != address(0)) {
+    //                 manager = payment * 5 / 100;
+    //             }
+    //         }
+    //         discount = (payment * code.discount) / 100;
+    //     }
+    //     payment -= discount;
+    //     team = payment - ambassador - manager;
+    // }
+
+    struct Amounts {
+        uint256 payment;
+        uint256 discount;
+        uint256 ambassador;
+        uint256 manager;
+        uint256 team;
     }
 
-    function mintWithAuth(
-        uint256 rarityId,
-        uint256 quantity,
-        string memory refCode,
-        uint256 validAfter,
-        uint256 validBefore,
-        bytes32 nonce,
-        bytes32 r,
-        bytes32 s,
-        uint8 v
-    ) external {
-        
+    // Mint NFTs with authorization for USDC payment
+    function mint(uint256 rarityId, uint256 quantity, string memory code, uint256 validAfter, uint256 validBefore, bytes32 nonce, uint8 v, bytes32 r, bytes32 s) external {
+
         // Get the payment details and validate the parameters (no need for a discount value returned)
-        (uint256 payment, , uint256 ambassador, uint256 manager, uint256 team) = getPaymentDetails(rarityId, quantity, refCode);
+        // (uint256 payment, , uint256 ambassador, uint256 manager, uint256 team) = getPaymentDetails(rarityId, quantity, refCode);
+        require(quantity > 0, "Amount must be greater than zero");
+        require(getAvailableNFTs(rarityId) > 0, "No NFTs left in this phase");
+        require(getAvailableNFTs(rarityId) >= quantity, "Exceeds phase remaining supply");
         
-        // Transfer USDC from user (only the final discounted price)
-        // usdc.safeTransferFrom(msg.sender, address(this), payment);
+        Amounts memory amounts;
+        amounts.payment = getPhasePrice(rarityId) * quantity;
+        amounts.discount = 0;
+        amounts.ambassador = 0;
+        amounts.manager = 0;
+        amounts.team = 0;
         
-        // Direct transfer using authorization - NO allowance set
-        // usdc.transferWithAuthorization(
-        //     msg.sender,     // from
-        //     address(this),  // to
-        //     payment,        // value
-        //     validAfter,     // valid after timestamp
-        //     validBefore,    // valid before timestamp  
-        //     nonce,          // unique nonce
-        //     r, s, v         // signature
-        // );
+        AmbassadorCode storage _amb_code = _amb_codes[code];
+        DiscounterCode storage _dis_code = _dis_codes[code];
 
-        usdc.transferWithAuthorization(
-            msg.sender,
-            address(this),
-            payment,
-            validAfter,
-            validBefore,
-            nonce,
-            v, r, s
-        );
-
-        // try usdc.transferWithAuthorization(
-        //     msg.sender,
-        //     address(this),
-        //     payment,
-        //     validAfter,
-        //     validBefore,
-        //     nonce,
-        //     v, r, s
-        // ) {
-        //     // Force a revert so you know you got here:
-        //     revert("after transfered");
-        // } catch Error(string memory reason) {
-        //     revert(string(abi.encodePacked("twA failed: ", reason)));
-        // } catch {
-        //     revert("twA failed: no revert data (selector mismatch?)");
-        // }
-
-        // require(false, "after transfered");
-         // Ambassador update stats
-        if (bytes(refCode).length > 0) {
-            AmbassadorCode storage code = _codes[refCode];
-            // Update ambassador stats 
-            code.minted[rarityId] += quantity;
-            code.earned += ambassador;
-            code.raised += team;
+        // Check for ambassador code
+        if(_amb_code.ambassador != address(0)) {
+            amounts.ambassador = (amounts.payment * (25 - _amb_code.discount)) / 100;
+            if (_amb_code.manager != address(0)) {
+                amounts.manager = amounts.payment * 5 / 100;
+            }
+            amounts.discount = (amounts.payment * _amb_code.discount) / 100;
+        }
+        // Check for discounter code
+        else if(_dis_code.discounter != address(0) && _dis_code.discounter == msg.sender) {
+            amounts.discount = (amounts.payment * _dis_code.discount) / 100;
         }
 
-        // Transfer USDC to the Ambassador
-        // if (bytes(refCode).length > 0 && ambassador > 0) {
-        //     AmbassadorCode storage code = _codes[refCode];
-        //     usdc.transfer(code.ambassador, ambassador);
-        //     emit AmbassadorRewardPaid(code.ambassador, ambassador);
+        amounts.payment -= amounts.discount;
+        amounts.team = amounts.payment - amounts.ambassador - amounts.manager;
+        
+        // Payment for NFT
+        usdc.transferWithAuthorization(msg.sender, address(this), amounts.payment, validAfter, validBefore, nonce, v, r, s);
+
+        // Update ambassador
+        if (_amb_code.ambassador != address(0)) {
+            _amb_code.minted[rarityId] += quantity;
+            _amb_code.earned += amounts.ambassador;
+            _amb_code.raised += amounts.team;
+
+            if(amounts.ambassador > 0) {
+                usdc.transfer(_amb_code.ambassador, amounts.ambassador);
+                emit AmbassadorRewardPaid(_amb_code.ambassador, amounts.ambassador);
+            }
             
-        //     if (manager > 0 && code.manager != address(0)) {
-        //         usdc.transfer(code.manager, manager);
-        //         emit AmbassadorRewardPaid(code.manager, manager);
-        //     }
-        // }
+            if (amounts.manager > 0 && _amb_code.manager != address(0)) {
+                usdc.transfer(_amb_code.manager, amounts.manager);
+                emit AmbassadorRewardPaid(_amb_code.manager, amounts.manager);
+            }
+        }
+        // Update discounter
+        else if(_dis_code.discounter != address(0) && amounts.discount > 0) {
+            _dis_code.minted[rarityId] += quantity;
+        }
 
         // Update phase minting count
         _phases[currentPhase].minted[rarityId] += quantity;
         
-        // FIXED: Mint NFT to the user (msg.sender), not to this contract
+        // Mint NFTs
         nfts.mint(msg.sender, rarityId, quantity);
 
-        emit NFTMinted(msg.sender, rarityId, quantity, payment);
+        // Emit event
+        emit NFTMinted(msg.sender, rarityId, quantity, amounts.payment);
     }
 
-    // Particular rarity minting
-    function mint(uint256 rarityId, uint256 amount, string memory refCode) external validRarity(rarityId) nonReentrant {
-        
-        // Get the payment details and validate the parameters (no need for a discount value returned)
-        (uint256 payment, , uint256 ambassador, uint256 manager, uint256 team) = getPaymentDetails(rarityId, amount, refCode);
-        
-        // Update phase minting count
-        _phases[currentPhase].minted[rarityId] += amount;
-        
-        // FIXED: Mint NFT to the user (msg.sender), not to this contract
-        nfts.mint(msg.sender, rarityId, amount);
-        
-        // Ambassador update stats
-        if (bytes(refCode).length > 0) {
-            AmbassadorCode storage code = _codes[refCode];
-            // Update ambassador stats 
-            code.minted[rarityId] += amount;
-            code.earned += ambassador;
-            code.raised += team;
-        }
-        
-        // Transfer USDC from user (only the final discounted price)
-        usdc.transferFrom(msg.sender, address(this), payment);
-        
-        // Transfer USDC to the Ambassador
-        if (bytes(refCode).length > 0 && ambassador > 0) {
-            AmbassadorCode storage code = _codes[refCode];
-            usdc.transfer(code.ambassador, ambassador);
-            emit AmbassadorRewardPaid(code.ambassador, ambassador);
-            
-            if (manager > 0 && code.manager != address(0)) {
-                usdc.transfer(code.manager, manager);
-                emit AmbassadorRewardPaid(code.manager, manager);
-            }
-        }
-        emit NFTMinted(msg.sender, rarityId, amount, payment);
-    }
-
-    
     // ------------------------------------------------------
     // Withdrawal System
     // ------------------------------------------------------

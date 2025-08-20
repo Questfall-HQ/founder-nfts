@@ -373,6 +373,29 @@
 				"type": "function"
 			},
 			{
+				"inputs": [
+					{
+						"internalType": "string",
+						"name": "code",
+						"type": "string"
+					},
+					{
+						"internalType": "address",
+						"name": "discounter",
+						"type": "address"
+					},
+					{
+						"internalType": "uint256",
+						"name": "discount",
+						"type": "uint256"
+					}
+				],
+				"name": "createDicounterCode",
+				"outputs": [],
+				"stateMutability": "nonpayable",
+				"type": "function"
+			},
+			{
 				"inputs": [],
 				"name": "currentPhase",
 				"outputs": [
@@ -402,7 +425,7 @@
 				"inputs": [
 					{
 						"internalType": "string",
-						"name": "refCode",
+						"name": "code",
 						"type": "string"
 					}
 				],
@@ -484,47 +507,34 @@
 			{
 				"inputs": [
 					{
-						"internalType": "uint256",
-						"name": "rarityId",
-						"type": "uint256"
-					},
-					{
-						"internalType": "uint256",
-						"name": "amount",
-						"type": "uint256"
-					},
-					{
 						"internalType": "string",
-						"name": "refCode",
+						"name": "code",
 						"type": "string"
 					}
 				],
-				"name": "getPaymentDetails",
+				"name": "getDiscounter",
 				"outputs": [
 					{
-						"internalType": "uint256",
-						"name": "payment",
-						"type": "uint256"
-					},
-					{
-						"internalType": "uint256",
-						"name": "discount",
-						"type": "uint256"
-					},
-					{
-						"internalType": "uint256",
-						"name": "ambassador",
-						"type": "uint256"
-					},
-					{
-						"internalType": "uint256",
-						"name": "manager",
-						"type": "uint256"
-					},
-					{
-						"internalType": "uint256",
-						"name": "team",
-						"type": "uint256"
+						"components": [
+							{
+								"internalType": "address",
+								"name": "discounter",
+								"type": "address"
+							},
+							{
+								"internalType": "uint256",
+								"name": "discount",
+								"type": "uint256"
+							},
+							{
+								"internalType": "uint256[6]",
+								"name": "minted",
+								"type": "uint256[6]"
+							}
+						],
+						"internalType": "struct FounderNFTMinter.DiscounterCode",
+						"name": "",
+						"type": "tuple"
 					}
 				],
 				"stateMutability": "view",
@@ -615,35 +625,12 @@
 					},
 					{
 						"internalType": "uint256",
-						"name": "amount",
-						"type": "uint256"
-					},
-					{
-						"internalType": "string",
-						"name": "refCode",
-						"type": "string"
-					}
-				],
-				"name": "mint",
-				"outputs": [],
-				"stateMutability": "nonpayable",
-				"type": "function"
-			},
-			{
-				"inputs": [
-					{
-						"internalType": "uint256",
-						"name": "rarityId",
-						"type": "uint256"
-					},
-					{
-						"internalType": "uint256",
 						"name": "quantity",
 						"type": "uint256"
 					},
 					{
 						"internalType": "string",
-						"name": "refCode",
+						"name": "code",
 						"type": "string"
 					},
 					{
@@ -662,6 +649,11 @@
 						"type": "bytes32"
 					},
 					{
+						"internalType": "uint8",
+						"name": "v",
+						"type": "uint8"
+					},
+					{
 						"internalType": "bytes32",
 						"name": "r",
 						"type": "bytes32"
@@ -670,14 +662,9 @@
 						"internalType": "bytes32",
 						"name": "s",
 						"type": "bytes32"
-					},
-					{
-						"internalType": "uint8",
-						"name": "v",
-						"type": "uint8"
 					}
 				],
-				"name": "mintWithAuth",
+				"name": "mint",
 				"outputs": [],
 				"stateMutability": "nonpayable",
 				"type": "function"
@@ -980,11 +967,11 @@
 			]
 		},
 		"founder-nft-minter.sol": {
-			"keccak256": "0x2bb1b64553510f67f95810e37647279a29c8ffe23b645076dcddfee73120dc99",
+			"keccak256": "0x2f61ec24897af6f3b0eb6200be00708477331fc6654e5653180862b460587730",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://dbc705916a134d823fb63ff5ec77dd75874ebce712e42c35298f4f180abd702d",
-				"dweb:/ipfs/QmP493fttLK2zyQUF5qsCo3dbL3coBEywkFRr1kcXcAv6h"
+				"bzz-raw://fec0657f78bf4275e4e00913a4044e08d4c76cc77bc5604b29d1d2ab8557fe15",
+				"dweb:/ipfs/QmdEEECQbT9puzUM5AGshAZdQo6LvmhcDoKJDcPGNy4mKH"
 			]
 		}
 	},

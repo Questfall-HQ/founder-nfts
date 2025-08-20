@@ -422,11 +422,11 @@
 			]
 		},
 		"founder-nft-minter.sol": {
-			"keccak256": "0x2bb1b64553510f67f95810e37647279a29c8ffe23b645076dcddfee73120dc99",
+			"keccak256": "0x2f61ec24897af6f3b0eb6200be00708477331fc6654e5653180862b460587730",
 			"license": "MIT",
 			"urls": [
-				"bzz-raw://dbc705916a134d823fb63ff5ec77dd75874ebce712e42c35298f4f180abd702d",
-				"dweb:/ipfs/QmP493fttLK2zyQUF5qsCo3dbL3coBEywkFRr1kcXcAv6h"
+				"bzz-raw://fec0657f78bf4275e4e00913a4044e08d4c76cc77bc5604b29d1d2ab8557fe15",
+				"dweb:/ipfs/QmdEEECQbT9puzUM5AGshAZdQo6LvmhcDoKJDcPGNy4mKH"
 			]
 		}
 	},
